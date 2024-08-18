@@ -247,6 +247,15 @@ namespace Huntdown
                 Description = new ConfigDescription("Whether the Last Month's Interns (4 masked) can be assigned as the hunt target or not.")
             },
 
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.ToggleButler,
+                Section = ConfigSections.Toggle.GetDescription(),
+                Key = "Butler Mission Enabled",
+                DefaultValue = true,
+                Description = new ConfigDescription("Whether the Butler can be assigned as the hunt target or not.")
+            },
+
             ///////////////////////////////////////////////////////
 
             new ConfigurableSetting
@@ -355,6 +364,15 @@ namespace Huntdown
                 Key = "Last Months Interns Mission Weight",
                 DefaultValue = 15,
                 Description = new ConfigDescription("Higher value = more likely. The likelihood that Last Month's Interns will be the target.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.WeightButler,
+                Section = ConfigSections.Weight.GetDescription(),
+                Key = "Butler Mission Weight",
+                DefaultValue = 15000,
+                Description = new ConfigDescription("Higher value = more likely. The likelihood that the Butler will be the target.")
             },
 
             ///////////////////////////////////////////////////////

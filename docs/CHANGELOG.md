@@ -1,3 +1,9 @@
+### 1.5.0
+
+- A bit of maintenance
+- Added a new mission, "Butler", along with their config options
+- Updated README to reflect the changes
+
 ### 1.4.1
 
 - Fixed a bug which sometimes allowed non-mission enemies to spawn on moons they shouldn't have been able to, like after getting a Good Boy mission on a moon, they would start to spawn naturally on that moon afterwards... oops. (thank you Alecksword for the bug report)

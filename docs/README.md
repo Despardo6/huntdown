@@ -16,6 +16,7 @@ Your mission will be displayed to all members of your team in the chat once you 
 - Bracken
 - Nutcracker
 - Masked
+- Butler
 - <details><summary>A good boy inside the facility...? (Spoiler)</summary>An Eyeless Dog but indoors</details>
 - <details><summary>The Bug Mafia (Spoiler)</summary>A bunch of Hoarding Bugs with shovels</details>
 - <details><summary>Blunderbug (Spoiler)</summary>A Hoarding Bug with a shotgun (WIP)</details>
@@ -23,7 +24,7 @@ Your mission will be displayed to all members of your team in the chat once you 
 - <details><summary>Last Month's Interns (Spoiler)</summary>Four Masked men coming to kill you</details>
 
 **Known Incompatible Mods:**
-- HostFixes by CharlesE2
+- None right now
 
 **A few minor features are host only due to the base game not networking them:**
 - Scanning the hunt target with right click only displays 'TARGET' label for the host
