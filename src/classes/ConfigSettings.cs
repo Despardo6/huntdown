@@ -371,7 +371,7 @@ namespace Huntdown
                 Index = ConfigIndexes.WeightButler,
                 Section = ConfigSections.Weight.GetDescription(),
                 Key = "Butler Mission Weight",
-                DefaultValue = 15000,
+                DefaultValue = 50,
                 Description = new ConfigDescription("Higher value = more likely. The likelihood that the Butler will be the target.")
             },
 
