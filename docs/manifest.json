@@ -1,0 +1,9 @@
+{
+    "name": "Huntdown",
+    "version_number": "1.4.1",
+    "website_url":  "",
+    "description": "Each day a mission is given to hunt down a specific monster, which drops a scrap reward when hunted. Missions are configurable and toggleable.",
+    "dependencies": [
+      "BepInEx-BepInExPack-5.4.2100"
+    ]
+}
