@@ -5,3 +5,7 @@
 /src/obj/Release
 /src/obj/Debug
 /src/bin
+/.vs
+/src/.vs
+/src/classes.zip
+/src/patches.zip
