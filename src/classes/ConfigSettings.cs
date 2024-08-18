@@ -82,6 +82,7 @@ namespace Huntdown
             ToggleBlunderbug,
             ToggleInfestation,
             ToggleLastcrew,
+            ToggleButler,
 
             ///////////////////////////////////////////////////////
 
@@ -97,6 +98,7 @@ namespace Huntdown
             WeightBlunderbug,
             WeightInfestation,
             WeightLastcrew,
+            WeightButler,
 
             ///////////////////////////////////////////////////////
 

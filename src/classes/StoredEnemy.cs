@@ -11,7 +11,8 @@ namespace Huntdown
         Thumper,
         Nutcracker,
         Masked,
-        EyelessDog
+        EyelessDog,
+        Butler
     }
 
     public class StoredEnemy

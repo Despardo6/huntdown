@@ -107,7 +107,8 @@ namespace Huntdown
                     new StoredEnemy(EnemyKey.Thumper, "Crawler (EnemyType)"),
                     new StoredEnemy(EnemyKey.Nutcracker, "Nutcracker (EnemyType)"),
                     new StoredEnemy(EnemyKey.Masked, "MaskedPlayerEnemy (EnemyType)"),
-                    new StoredEnemy(EnemyKey.EyelessDog, "MouthDog (EnemyType)")
+                    new StoredEnemy(EnemyKey.EyelessDog, "MouthDog (EnemyType)"),
+                    new StoredEnemy(EnemyKey.Butler, "Butler (EnemyType)"),
                 };
                 _logger.LogInfo("Keys successfully assigned to enemies.");
             }
@@ -395,6 +396,18 @@ namespace Huntdown
                         ),
                         ConfigIndexes.ToggleLastcrew,
                         _possibleRewardPools[(int)RewardPoolKey.HugeRewardPool]
+                    ),
+
+                    CreateMission
+                    (
+                        "Butler",
+                        ConfigIndexes.WeightButler,
+                        CreateEnemyDictionary
+                        (
+                            (EnemyKey.Butler, 1)
+                        ),
+                        ConfigIndexes.ToggleButler,
+                        _possibleRewardPools[(int)RewardPoolKey.MediumRewardPool]
                     ),
                 };
                 _logger.LogInfo("Missions successfully created.");

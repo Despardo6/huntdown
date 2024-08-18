@@ -17,7 +17,8 @@ namespace Huntdown
         Nutcracker,
         Masked,
         GoodBoy,
-        BugMafia
+        BugMafia,
+        Butler
     }
 
     public class Mission
