@@ -24,7 +24,7 @@ Your mission will be displayed to all members of your team in the chat once you 
 - <details><summary>Last Month's Interns (Spoiler)</summary>Four Masked men coming to kill you</details>
 
 **Known Incompatible Mods:**
-- None right now
+- None that I know of right now
 
 **A few minor features are host only due to the base game not networking them:**
 - Scanning the hunt target with right click only displays 'TARGET' label for the host

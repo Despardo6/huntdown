@@ -392,7 +392,7 @@ namespace Huntdown
                 Section = ConfigSections.Reward.GetDescription(),
                 Key = "Medium Mission Reward",
                 DefaultValue = 100,
-                Description = new ConfigDescription("How much the scrap dropped from a medium mission is worth (Thumper, Bunker Spider, Masked, Blunderbug).")
+                Description = new ConfigDescription("How much the scrap dropped from a medium mission is worth (Thumper, Bunker Spider, Masked, Butler, Blunderbug).")
             },
 
             new ConfigurableSetting
