@@ -1,3 +1,7 @@
+### 1.5.1
+
+- Fixed a bug which caused enemies to sometimes be teeny tiny when they spawn (thank you AquatuzMagnus for the bug report)
+
 ### 1.5.0
 
 - A bit of maintenance
