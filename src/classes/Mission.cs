@@ -183,7 +183,7 @@ namespace Huntdown
                             t_spawnableEnemy.enemyType = UnityEngine.Object.Instantiate(t_spawnableEnemy.enemyType);
                             t_spawnableEnemy.enemyType.enemyPrefab = UnityEngine.Object.Instantiate(t_spawnableEnemy.enemyType.enemyPrefab);
                             t_spawnableEnemy.enemyType.enemyPrefab.GetComponentInChildren<ScanNodeProperties>().headerText = "<color=white>TARGET</color>";
-                            t_spawnableEnemy.enemyType.enemyPrefab.transform.localScale = (t_spawnableEnemy.enemyType.enemyPrefab.transform.localScale / 2f);
+                            // t_spawnableEnemy.enemyType.enemyPrefab.transform.localScale = (t_spawnableEnemy.enemyType.enemyPrefab.transform.localScale / 2f);
                             level.Enemies.Add(t_spawnableEnemy);
                             RoundManager.Instance.SpawnEnemyOnServer(vent.transform.position, 0f, level.Enemies.IndexOf(level.Enemies.Last()));
                             level.Enemies.Remove(level.Enemies.Last());
