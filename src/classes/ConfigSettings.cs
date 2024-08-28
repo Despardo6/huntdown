@@ -83,10 +83,12 @@ namespace Huntdown
             ToggleInfestation,
             ToggleLastcrew,
             ToggleButler,
+			ToggleManeater,
+            ToggleBaboonGang,
 
-            ///////////////////////////////////////////////////////
+			///////////////////////////////////////////////////////
 
-            WeightFlea,
+			WeightFlea,
             WeightSpider,
             WeightHoarder,
             WeightBracken,
@@ -99,10 +101,12 @@ namespace Huntdown
             WeightInfestation,
             WeightLastcrew,
             WeightButler,
+			WeightManeater,
+            WeightBaboonGang,
 
-            ///////////////////////////////////////////////////////
+			///////////////////////////////////////////////////////
 
-            RewardLow,
+			RewardLow,
             RewardMedium,
             RewardHigh,
             RewardExtreme
@@ -256,6 +260,24 @@ namespace Huntdown
                 Description = new ConfigDescription("Whether the Butler can be assigned as the hunt target or not.")
             },
 
+			new ConfigurableSetting
+			{
+				Index = ConfigIndexes.ToggleManeater,
+				Section = ConfigSections.Toggle.GetDescription(),
+				Key = "Maneater Mission Enabled",
+				DefaultValue = true,
+				Description = new ConfigDescription("Whether the Maneater can be assigned as the hunt target or not.")
+			},
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.ToggleBaboonGang,
+                Section = ConfigSections.Toggle.GetDescription(),
+                Key = "Baboon Gang Mission Enabled",
+                DefaultValue = true,
+                Description = new ConfigDescription("Whether the Baboon Gang (3 baboon hawks) can be assigned as the hunt target or not.")
+            },
+
             ///////////////////////////////////////////////////////
 
             new ConfigurableSetting
@@ -375,6 +397,24 @@ namespace Huntdown
                 Description = new ConfigDescription("Higher value = more likely. The likelihood that the Butler will be the target.")
             },
 
+			new ConfigurableSetting
+			{
+				Index = ConfigIndexes.WeightManeater,
+				Section = ConfigSections.Weight.GetDescription(),
+				Key = "Maneater Mission Weight",
+				DefaultValue = 10,
+				Description = new ConfigDescription("Higher value = more likely. The likelihood that the Maneater will be the target.")
+			},
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.WeightBaboonGang,
+                Section = ConfigSections.Weight.GetDescription(),
+                Key = "Baboon Gang Mission Weight",
+                DefaultValue = 30,
+                Description = new ConfigDescription("Higher value = more likely. The likelihood that the Baboon Gang will be the target.")
+            },
+
             ///////////////////////////////////////////////////////
 
             new ConfigurableSetting
@@ -401,7 +441,7 @@ namespace Huntdown
                 Section = ConfigSections.Reward.GetDescription(),
                 Key = "Hard Mission Reward",
                 DefaultValue = 200,
-                Description = new ConfigDescription("How much the scrap dropped from a hard mission is worth (Bracken, Nutcracker, Bug Mafia, Infestation).")
+                Description = new ConfigDescription("How much the scrap dropped from a hard mission is worth (Bracken, Nutcracker, Bug Mafia, Infestation, Baboon Gang).")
             },
 
             new ConfigurableSetting
@@ -410,7 +450,7 @@ namespace Huntdown
                 Section = ConfigSections.Reward.GetDescription(),
                 Key = "Extreme Mission Reward",
                 DefaultValue = 300,
-                Description = new ConfigDescription("How much the scrap dropped from an extreme mission is worth (Good Boy, Last Months Interns).")
+                Description = new ConfigDescription("How much the scrap dropped from an extreme mission is worth (Good Boy, Last Months Interns, Maneater).")
             },
         };
 

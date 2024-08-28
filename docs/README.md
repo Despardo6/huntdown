@@ -17,11 +17,13 @@ Your mission will be displayed to all members of your team in the chat once you 
 - Nutcracker
 - Masked
 - Butler
+- Maneater
 - <details><summary>A good boy inside the facility...? (Spoiler)</summary>An Eyeless Dog but indoors</details>
 - <details><summary>The Bug Mafia (Spoiler)</summary>A bunch of Hoarding Bugs with shovels</details>
 - <details><summary>Blunderbug (Spoiler)</summary>A Hoarding Bug with a shotgun (WIP)</details>
 - <details><summary>Infestation (Spoiler)</summary>A bunch of bugs (1 Bunker Spider, 2 Hoarding Bugs and 2 Snare Fleas in the same area)</details>
 - <details><summary>Last Month's Interns (Spoiler)</summary>Four Masked men coming to kill you</details>
+- <details><summary>Baboon Gang (Spoiler)</summary>Baboons but inside</details>
 
 **Known Incompatible Mods:**
 - None that I know of right now
