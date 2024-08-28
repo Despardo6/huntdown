@@ -109,6 +109,8 @@ namespace Huntdown
                     new StoredEnemy(EnemyKey.Masked, "MaskedPlayerEnemy (EnemyType)"),
                     new StoredEnemy(EnemyKey.EyelessDog, "MouthDog (EnemyType)"),
                     new StoredEnemy(EnemyKey.Butler, "Butler (EnemyType)"),
+					new StoredEnemy(EnemyKey.Maneater, "CaveDweller (EnemyType)"),
+                    new StoredEnemy(EnemyKey.BaboonHawk, "BaboonHawk (EnemyType)"),
                 };
                 _logger.LogInfo("Keys successfully assigned to enemies.");
             }
@@ -190,6 +192,16 @@ namespace Huntdown
                     new StoredItem(ItemKey.TragedyMask, "TragedyMask (Item)"),
                     new StoredItem(ItemKey.ComedyMask, "ComedyMask (Item)"),
                     new StoredItem(ItemKey.WhoopieCushion, "WhoopieCushion (Item)"),
+                    new StoredItem(ItemKey.EasterEgg, "EasterEgg (Item)"),
+                    new StoredItem(ItemKey.GarbageLid, "GarbageLid (Item)"),
+                    new StoredItem(ItemKey.ToiletPaperRolls, "ToiletPaperRolls (Item)"),
+                    new StoredItem(ItemKey.Zeddog, "Zeddog (Item)"),
+                    new StoredItem(ItemKey.WeedKillerBottle, "WeedKillerBottle (Item)"),
+                    new StoredItem(ItemKey.ToyTrain, "ToyTrain (Item)"),
+                    new StoredItem(ItemKey.SoccerBall, "SoccerBall (Item)"),
+                    new StoredItem(ItemKey.Knife, "Knife (Item)"),
+                    new StoredItem(ItemKey.ControlPad, "ControlPad (Item)"),
+                    new StoredItem(ItemKey.PlasticCup, "PlasticCup (Item)"),
                 };
                 _logger.LogInfo("Keys successfully assigned to items.");
             }
@@ -215,6 +227,8 @@ namespace Huntdown
                             _storedItems[(int)ItemKey.SprayPaint],
                             _storedItems[(int)ItemKey.TZPInhalant],
                             _storedItems[(int)ItemKey.StunGrenade],
+                            _storedItems[(int)ItemKey.EasterEgg],
+                            _storedItems[(int)ItemKey.WeedKillerBottle],
                         },
                         ConfigIndexes.RewardLow
                     ),
@@ -230,6 +244,7 @@ namespace Huntdown
                             _storedItems[(int)ItemKey.RobotToy],
                             _storedItems[(int)ItemKey.MagnifyingGlass],
                             _storedItems[(int)ItemKey.Dentures],
+                            _storedItems[(int)ItemKey.GarbageLid],
                         },
                         ConfigIndexes.RewardMedium
                     ),
@@ -245,6 +260,11 @@ namespace Huntdown
                             _storedItems[(int)ItemKey.FancyLamp],
                             _storedItems[(int)ItemKey.Jetpack],
                             _storedItems[(int)ItemKey.ZapGun],
+                            _storedItems[(int)ItemKey.Knife],
+                            _storedItems[(int)ItemKey.ToyTrain],
+                            _storedItems[(int)ItemKey.SoccerBall],
+                            _storedItems[(int)ItemKey.ControlPad],
+                            _storedItems[(int)ItemKey.ToiletPaperRolls],
                         },
                         ConfigIndexes.RewardHigh
                     ),
@@ -256,6 +276,8 @@ namespace Huntdown
                             _storedItems[(int)ItemKey.GoldBar],
                             _storedItems[(int)ItemKey.CashRegister],
                             _storedItems[(int)ItemKey.MapDevice],
+                            _storedItems[(int)ItemKey.Zeddog],
+                            _storedItems[(int)ItemKey.PlasticCup],
                         },
                         ConfigIndexes.RewardExtreme
                     ),
@@ -409,6 +431,31 @@ namespace Huntdown
                         ConfigIndexes.ToggleButler,
                         _possibleRewardPools[(int)RewardPoolKey.MediumRewardPool]
                     ),
+
+					CreateMission
+					(
+						"Maneater",
+						ConfigIndexes.WeightManeater,
+						CreateEnemyDictionary
+						(
+							(EnemyKey.Maneater, 1)
+						),
+						ConfigIndexes.ToggleManeater,
+						_possibleRewardPools[(int)RewardPoolKey.HugeRewardPool]
+					),
+
+                    CreateMission
+                    (
+                        "Baboon Gang",
+                        ConfigIndexes.WeightBaboonGang,
+                        CreateEnemyDictionary
+                        (
+                            (EnemyKey.BaboonHawk, 3)
+                        ),
+                        ConfigIndexes.ToggleBaboonGang,
+                        _possibleRewardPools[(int)RewardPoolKey.LargeRewardPool]
+                    ),
+
                 };
                 _logger.LogInfo("Missions successfully created.");
             }

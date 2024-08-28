@@ -1,3 +1,9 @@
+### 1.5.2
+
+- Added a new mission, "Maneater", along with their config options
+- Added a new mission, "Baboon Gang", along with their config options
+- Added all new scraps to reward item pools (Zed dog, plastic cup, garbage lid, control pad, soccer ball, easter egg, toilet paper, weed killer, toy train)
+
 ### 1.5.1
 
 - Fixed a bug which caused enemies to sometimes be teeny tiny when they spawn (thank you AquatuzMagnus for the bug report)

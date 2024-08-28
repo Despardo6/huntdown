@@ -36,7 +36,7 @@ namespace Huntdown
     }
 }
 
-    /*public class RewardPool
+   /*public class RewardPool
     {
         //public SpawnableItemWithRarity[] SpawnableItems;
         //public Item ItemType;

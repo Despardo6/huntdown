@@ -18,7 +18,9 @@ namespace Huntdown
         Masked,
         GoodBoy,
         BugMafia,
-        Butler
+        Butler,
+        Maneater,
+        BaboonGang,
     }
 
     public class Mission

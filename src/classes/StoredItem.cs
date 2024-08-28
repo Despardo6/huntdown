@@ -70,6 +70,16 @@
         TragedyMask,
         ComedyMask,
         WhoopieCushion,
+        EasterEgg,
+        GarbageLid,
+        ToiletPaperRolls,
+        Zeddog,
+        WeedKillerBottle,
+        ToyTrain,
+        SoccerBall,
+        Knife,
+        ControlPad,
+        PlasticCup,
     }
 
 
