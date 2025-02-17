@@ -4,25 +4,10 @@ using System.Linq;
 using UnityEngine;
 using static Huntdown.ConfigSettings;
 using static Huntdown.Huntdown;
+using Unity.Netcode;
 
 namespace Huntdown
 {
-    public enum MissionKey
-    {
-        SnareFlea,
-        BunkerSpider,
-        HoarderBug,
-        Bracken,
-        Thumper,
-        Nutcracker,
-        Masked,
-        GoodBoy,
-        BugMafia,
-        Butler,
-        Maneater,
-        BaboonGang,
-    }
-
     public class Mission
     {
         private readonly string _name;
@@ -35,6 +20,18 @@ namespace Huntdown
         private static int _totalWeight;
         private static readonly int _missionChance = (int)ConfigEntries[(int)ConfigIndexes.GeneralPercentageChance].BoxedValue;
         private bool _enabled;
+
+        private readonly List<EnemyKey> _randomEnemyChoices = new List<EnemyKey>
+        {
+            EnemyKey.Thumper,
+            EnemyKey.BunkerSpider,
+            EnemyKey.HoarderBug,
+            EnemyKey.SnareFlea,
+            EnemyKey.Nutcracker,
+            EnemyKey.Masked,
+            EnemyKey.Bracken,
+            EnemyKey.Maneater
+        };
 
         public Mission(string name, int baseWeight, Dictionary<EnemyKey, int> enemiesToSpawn, bool enabled, RewardPool rewardPool)
         {
@@ -68,7 +65,7 @@ namespace Huntdown
 
             Vector3 entrancePos = RoundManager.FindMainEntrancePosition();
             float longestDist = 0f;
-            List <EnemyVent> allFarVents = new List<EnemyVent>();
+            List<EnemyVent> allFarVents = new List<EnemyVent>();
 
 
             _logger.LogInfo("MainEntrancePos: " + entrancePos);
@@ -127,99 +124,235 @@ namespace Huntdown
 
         private void ForceAIInside(EnemyAI enemyAI)
         {
-            _logger.LogInfo("Forcing dog AI to work indoors.");
-            enemyAI.enemyType = UnityEngine.Object.Instantiate(enemyAI.enemyType);
+            _logger.LogInfo("Forcing AI to work indoors.");
             enemyAI.enemyType.isOutsideEnemy = false;
+            enemyAI.daytimeEnemyLeaving = false;
             enemyAI.allAINodes = GameObject.FindGameObjectsWithTag("AINode");
-            enemyAI.SyncPositionToClients();
+            // Removed: enemyAI.SyncPositionToClients();  // No longer needed.
         }
 
-        private void SpawnUnnaturalEnemiesAtVent(ref SelectableLevel level, EnemyVent vent, KeyValuePair<EnemyKey, int> entry)
+        private void SpawnUnnaturalEnemiesAtVent(ref SelectableLevel level, EnemyVent vent, EnemyKey enemyKey, int count)
         {
             _logger.LogInfo("Enemy does not spawn naturally on this moon. Temporarily adding it to spawnable enemies.");
-            level.Enemies.Add(_storedEnemies[(int)entry.Key].SpawnableEnemy);
-            for (int i = 0; i < entry.Value; i++)
+            level.Enemies.Add(_storedEnemies[(int)enemyKey].SpawnableEnemy);
+            for (int i = 0; i < count; i++)
             {
-                RoundManager.Instance.SpawnEnemyOnServer(vent.transform.position, 0f, level.Enemies.IndexOf(_storedEnemies[(int)entry.Key].SpawnableEnemy));
-                // level.Enemies.Add(_storedEnemies[(int)entry.Key].SpawnableEnemy);
+                RoundManager.Instance.SpawnEnemyOnServer(vent.transform.position, 0f, level.Enemies.IndexOf(_storedEnemies[(int)enemyKey].SpawnableEnemy));
                 _aliveEnemies.Add(RoundManager.Instance.SpawnedEnemies[RoundManager.Instance.SpawnedEnemies.Count - 1]);
                 EnemyAI enemyAI = _aliveEnemies[_aliveEnemies.Count - 1];
 
-                if (enemyAI is MouthDogAI)
+                if (enemyAI is MouthDogAI || enemyAI is BaboonBirdAI || enemyAI is ForestGiantAI)
                 {
-                    _logger.LogInfo("Dog detected, forcing it to work inside.");
+                    _logger.LogInfo("Dog/Baboon/Giant detected, forcing it to work inside.");
                     ForceAIInside(enemyAI);
-                    _logger.LogInfo("Forced doggo inside successfully.");
+                    _logger.LogInfo("Forced inside successfully.");
                 }
 
-                if (enemyAI.gameObject.GetComponentInChildren<ScanNodeProperties>())
+                // --- Conditional Scale and HP Modification ---
+                if (_currentMission != null && _currentMission.Name == "Facility Keeper")
                 {
-                    enemyAI.gameObject.GetComponentInChildren<ScanNodeProperties>().headerText = "<color=white>TARGET</color>";
+                    if (enemyAI != null)
+                    {
+                        // Calculate scale.
+                        Vector3 newScale = (enemyAI.transform.localScale / 4);
+
+                        // 1. Despawn
+                        enemyAI.gameObject.GetComponent<NetworkObject>().Despawn(false);
+
+                        // 2. Change Scale and HP
+                        enemyAI.transform.localScale = newScale;
+                        enemyAI.enemyHP = 5;
+
+                        // 3. Respawn
+                        enemyAI.gameObject.GetComponent<NetworkObject>().Spawn();
+                    }
+                }
+                // --- End Conditional Modification ---
+
+                ApplyGiantSizeUpgradedModifiers(enemyAI);
+                ApplyTinySizeModifiers(enemyAI);
+
+                ScanNodeProperties scanNode = enemyAI.gameObject.GetComponentInChildren<ScanNodeProperties>();
+                if ((bool)ConfigEntries[(int)ConfigIndexes.ChangeSubtext].BoxedValue)
+                {
+                    scanNode.subText = "<color=white>TARGET</color>";
+                }
+                else
+                {
+                    scanNode.headerText = "<color=white>TARGET</color>";
                 }
             }
-            level.Enemies.Remove(_storedEnemies[(int)entry.Key].SpawnableEnemy);
+            level.Enemies.Remove(_storedEnemies[(int)enemyKey].SpawnableEnemy);
+        }
+        private void ApplyGiantSizeUpgradedModifiers(EnemyAI enemyAI)
+        {
+            if (_currentMission != null && _currentMission.Name == "Giant Size: Upgraded")
+            {
+                if (enemyAI != null)
+                {
+                    // 1. Despawn (only if not already despawned - important for network synchronization)
+                    if (enemyAI.gameObject.GetComponent<NetworkObject>().IsSpawned)
+                    {
+                        enemyAI.gameObject.GetComponent<NetworkObject>().Despawn(false);
+                    }
+
+                    // 2. Change Scale and HP
+                    enemyAI.transform.localScale *= 2;
+
+                    if (enemyAI is HoarderBugAI)
+                    {
+                        enemyAI.enemyHP *= 12;
+                    }
+                    else if (enemyAI is CentipedeAI)
+                    {
+                        enemyAI.enemyHP *= 17;
+                    }
+                    else if (enemyAI is MaskedPlayerEnemy)
+                    {
+                        enemyAI.enemyHP *= 5;
+                    }
+                    else if (enemyAI is CaveDwellerAI) // Maneater
+                    {
+                        enemyAI.enemyHP *= 2;
+                    }
+                    else
+                    {
+                        enemyAI.enemyHP *= 3;
+                    }
+                    // 3. Respawn
+                    enemyAI.gameObject.GetComponent<NetworkObject>().Spawn();
+                }
+            }
+        }
+
+        private void ApplyTinySizeModifiers(EnemyAI enemyAI)
+        {
+            if (_currentMission?.Name == "Big Trouble Little Enemies" || _currentMission?.Name == "Who let the puppies out?")
+            {
+                if (enemyAI != null)
+                {
+                    // 1. Despawn (only if not already despawned - important for network synchronization)
+                    if (enemyAI.gameObject.GetComponent<NetworkObject>().IsSpawned)
+                    {
+                        enemyAI.gameObject.GetComponent<NetworkObject>().Despawn(false);
+                    }
+
+                    // 2. Change Scale and HP
+                    enemyAI.transform.localScale /= 3;
+                    enemyAI.enemyHP = 1;
+
+                    // 3. Respawn
+                    enemyAI.gameObject.GetComponent<NetworkObject>().Spawn();
+                }
+            }
         }
 
         public void SpawnEnemiesAtVent(ref SelectableLevel level, EnemyVent vent)
         {
             _logger.LogInfo("Spawning mission targets...");
+            _aliveEnemies.Clear();
+
             foreach (KeyValuePair<EnemyKey, int> entry in _enemiesToSpawn)
             {
-                _logger.LogInfo("Spawning " + entry.Value + " " + _storedEnemies[(int)entry.Key].Name + ".");
-                if (!level.Enemies.Contains(_storedEnemies[(int)entry.Key].SpawnableEnemy))
+                _logger.LogInfo($"Processing entry: {entry.Key}, Count: {entry.Value}"); // Debug log
+
+                for (int i = 0; i < entry.Value; i++) // Loop for the NUMBER of enemies to spawn
                 {
-                    SpawnUnnaturalEnemiesAtVent(ref level, vent, entry);
-                }
-                else
-                {
-                    for (int i = 0; i < entry.Value; i++)
+                    EnemyKey enemyKeyToSpawn = entry.Key; // Initialize with the configured key
+
+                    if (enemyKeyToSpawn == EnemyKey.Random)
                     {
+                        // Pick a random enemy from the list *INSIDE* the spawn loop
+                        var rand = new System.Random();
+                        int randomEnemyIndex = rand.Next(0, _randomEnemyChoices.Count);
+                        enemyKeyToSpawn = _randomEnemyChoices[randomEnemyIndex];
+                        _logger.LogInfo($"Randomly selected enemy: {_storedEnemies[(int)enemyKeyToSpawn].Name}"); // Debug log
+                    }
+                    else
+                    {
+                        _logger.LogInfo($"Spawning configured enemy: {_storedEnemies[(int)enemyKeyToSpawn].Name}"); //Debug log
+                    }
+
+                    // Now spawn the selected enemy (either the configured one or the random one)
+                    if (!level.Enemies.Contains(_storedEnemies[(int)enemyKeyToSpawn].SpawnableEnemy))
+                    {
+                        SpawnUnnaturalEnemiesAtVent(ref level, vent, enemyKeyToSpawn, 1); // Spawn ONE at a time
+                    }
+                    else
+                    {
+                        // --- Existing Spawning Logic (Corrected for single-enemy spawn) ---
                         try
                         {
-                            //RoundManager.Instance.SpawnEnemyOnServer(vent.transform.position, 0f, level.Enemies.IndexOf(_storedEnemies[(int)entry.Key].SpawnableEnemy));
-                            //EnemyAI tempAI = RoundManager.Instance.SpawnedEnemies[RoundManager.Instance.SpawnedEnemies.Count - 1];
+                            SpawnableEnemyWithRarity t_spawnableEnemy = _storedEnemies[(int)enemyKeyToSpawn].SpawnableEnemy;
+                            GameObject enemyInstance = UnityEngine.Object.Instantiate(t_spawnableEnemy.enemyType.enemyPrefab);
 
-                            //tempAI.gameObject.GetComponentInChildren<ScanNodeProperties>().headerText = "<color=white>TARGET</color>";
+                            ScanNodeProperties scanNode = enemyInstance.GetComponentInChildren<ScanNodeProperties>();
+                            if (scanNode != null)
+                            {
+                                if ((bool)ConfigEntries[(int)ConfigIndexes.ChangeSubtext].BoxedValue)
+                                {
+                                    scanNode.subText = "<color=white>TARGET</color>";
+                                }
+                                else
+                                {
+                                    scanNode.headerText = "<color=white>TARGET</color>";
+                                }
+                            }
 
-                            SpawnableEnemyWithRarity t_spawnableEnemy = _storedEnemies[(int)entry.Key].SpawnableEnemy;
-                            t_spawnableEnemy.enemyType = UnityEngine.Object.Instantiate(t_spawnableEnemy.enemyType);
-                            t_spawnableEnemy.enemyType.enemyPrefab = UnityEngine.Object.Instantiate(t_spawnableEnemy.enemyType.enemyPrefab);
-                            t_spawnableEnemy.enemyType.enemyPrefab.GetComponentInChildren<ScanNodeProperties>().headerText = "<color=white>TARGET</color>";
-                            // t_spawnableEnemy.enemyType.enemyPrefab.transform.localScale = (t_spawnableEnemy.enemyType.enemyPrefab.transform.localScale / 2f);
-                            level.Enemies.Add(t_spawnableEnemy);
-                            RoundManager.Instance.SpawnEnemyOnServer(vent.transform.position, 0f, level.Enemies.IndexOf(level.Enemies.Last()));
-                            level.Enemies.Remove(level.Enemies.Last());
+                            // Create a temporary SpawnableEnemyWithRarity for this single instance
+                            SpawnableEnemyWithRarity tempSpawnable = new SpawnableEnemyWithRarity
+                            {
+                                enemyType = new EnemyType
+                                {
+                                    enemyPrefab = enemyInstance, // Use the instantiated prefab
+                                    isOutsideEnemy = t_spawnableEnemy.enemyType.isOutsideEnemy,
+                                },
+                            };
 
-                            // RoundManager.Instance.SpawnEnemyOnServer(vent.transform.position, 0f, level.Enemies.IndexOf(_storedEnemies[(int)entry.Key].SpawnableEnemy));
-                            _logger.LogInfo("Enemy spawned successfully.");
+                            level.Enemies.Add(tempSpawnable);
+                            int enemyIndex = level.Enemies.IndexOf(level.Enemies.Last()); // Get index of *last* added enemy
+                            RoundManager.Instance.SpawnEnemyOnServer(vent.transform.position, 0f, enemyIndex);
+                            level.Enemies.RemoveAt(enemyIndex);
+                            UnityEngine.Object.Destroy(enemyInstance); // Destroy the instance after spawning
+
+                            _aliveEnemies.Add(RoundManager.Instance.SpawnedEnemies.Last()); // Add to alive enemies
+                            EnemyAI enemyAI = _aliveEnemies.Last();
+
+                            // --- Conditional Scale and HP Modification ---
+                            if (_currentMission != null && _currentMission.Name == "Facility Keeper")
+                            {
+                                if (enemyAI != null)
+                                {
+                                    // Calculate scale.
+                                    Vector3 newScale = (enemyAI.transform.localScale / 4);
+
+                                    // 1. Despawn
+                                    enemyAI.gameObject.GetComponent<NetworkObject>().Despawn(false);
+
+                                    // 2. Change Scale and HP
+                                    enemyAI.transform.localScale = newScale;
+                                    enemyAI.enemyHP = 5;
+
+                                    // 3. Respawn
+                                    enemyAI.gameObject.GetComponent<NetworkObject>().Spawn();
+                                }
+                            }
+                            // --- End Conditional Modification ---
+
+                            ApplyGiantSizeUpgradedModifiers(enemyAI);
+                            ApplyTinySizeModifiers(enemyAI);
+
+                            if (enemyAI is MouthDogAI || enemyAI is BaboonBirdAI || enemyAI is ForestGiantAI)
+                            {
+                                _logger.LogInfo("Dog/Baboon/Giant detected, forcing it to work inside.");
+                                ForceAIInside(enemyAI);
+                                _logger.LogInfo("Forced inside successfully.");
+                            }
+
                         }
                         catch (Exception ex)
                         {
                             _logger.LogError("Could not spawn enemy.\n" + ex.Message);
-                        }
-
-                        // level.Enemies.Add(_storedEnemies[(int)entry.Key].SpawnableEnemy);
-                        _aliveEnemies.Add(RoundManager.Instance.SpawnedEnemies[RoundManager.Instance.SpawnedEnemies.Count - 1]);
-                        EnemyAI enemyAI = _aliveEnemies[_aliveEnemies.Count - 1];
-
-                        if (enemyAI is MouthDogAI)
-                        {
-                            _logger.LogInfo("Dog detected, forcing it to work inside.");
-                            ForceAIInside(enemyAI);
-                            _logger.LogInfo("Forced doggo inside successfully.");
-                        }
-
-                        try
-                        {
-                            if (enemyAI.gameObject.GetComponentInChildren<ScanNodeProperties>())
-                            {
-                                enemyAI.gameObject.GetComponentInChildren<ScanNodeProperties>().headerText = "<color=white>TARGET</color>";
-                                _logger.LogInfo("Applied header text to enemy's scan node successfully.");
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError("EnemyAI does not have a gameObject, or something is wrong with this function.\n" + ex.Message);
                         }
                     }
                 }
@@ -227,6 +360,7 @@ namespace Huntdown
 
             _maxEnemies = _aliveEnemies.Count;
         }
+
 
         public string Name
         {

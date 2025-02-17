@@ -1,6 +1,6 @@
 {
     "name": "Huntdown",
-    "version_number": "1.5.2",
+    "version_number": "1.6.0",
     "website_url":  "",
     "description": "Each day a mission is given to hunt down a specific monster, which drops a scrap reward when hunted. Missions are configurable and toggleable.",
     "dependencies": [

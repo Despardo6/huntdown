@@ -3,6 +3,7 @@ using HarmonyLib;
 using Huntdown.Patches;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
 using static Huntdown.ConfigSettings;
 
@@ -10,11 +11,19 @@ using static Huntdown.ConfigSettings;
 namespace Huntdown
 {
     [BepInPlugin(_modGUID, _modName, _modVersion)]
+    [BepInDependency("evaisa.lethalthings", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency("LethalCompanyHarpGhost", BepInDependency.DependencyFlags.SoftDependency)]
+    // Why does Aloe has its own spawning logic???
+    //[BepInDependency("com.github.biodiversitylc.Biodiversity", BepInDependency.DependencyFlags.SoftDependency)]
+    // Cant seem to make balls spawnable in reward pools :(
+    //[BepInDependency("LethalMon", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency("Jordo.NeedyCats", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency("Theronguard.EmergencyDice", BepInDependency.DependencyFlags.SoftDependency)]
     public class Huntdown : BaseUnityPlugin
     {
         private const string _modGUID = "doggosuki.Huntdown";
         private const string _modName = "Huntdown";
-        private const string _modVersion = "1.4.1";
+        private const string _modVersion = "1.6.0";
 
         private readonly Harmony _harmony = new Harmony(_modGUID);
         public static Huntdown _instance;
@@ -31,16 +40,23 @@ namespace Huntdown
         public static EnemyVent[] _allEnemyVents; // Array of vents on level
         public static int[] _allScrapValue; // Array of ints for the value of each item of scrap in the level
         public static NetworkObjectReference[] _allScrapNetwork; // Array of networked references to each item of scrap in the level
-        
+
         public static StoredEnemy[] _storedEnemies;
         public static StoredItem[] _storedItems;
         public static RewardPool[] _possibleRewardPools;
         public static Mission[] _possibleMissions;
-        
+
         public static TerminalNode _terminalNode = new TerminalNode();
         public static TerminalKeyword _terminalKeyword = new TerminalKeyword();
         public static Mission _currentMission;
         public static EnemyAI _lastEnemyKilled;
+
+        public static bool lethalThingsPresent = false;
+        public static bool hauntedHarpistPresent = false;
+        //public static bool bioDiversityPresent = false;
+        public static bool needyCatsPresent = false;
+        //public static bool lethalMonPresent = false;
+        public static bool emergencyDicePresent = false;
 
         Dictionary<EnemyKey, int> CreateEnemyDictionary(params (EnemyKey key, int value)[] keyValuePairs)
         {
@@ -58,20 +74,22 @@ namespace Huntdown
 
             _logger.LogInfo($"Creating reward pool. Index: {index}, Value: {val}");
 
+            StoredItem[] nonNullItems = items.Where(item => item != null).ToArray();
+
             return new RewardPool
             (
-                items,
+                nonNullItems,
                 (int)ConfigEntries[(int)index].BoxedValue
             );
         }
 
         private Mission CreateMission(string name, ConfigIndexes weightIndex, Dictionary<EnemyKey, int> enemies, ConfigIndexes toggleIndex, RewardPool rewardPool)
         {
-            var weight = (int)ConfigEntries[(int)weightIndex].BoxedValue;
+            // Read enabled status from config.
             var enabled = (bool)ConfigEntries[(int)toggleIndex].BoxedValue;
+            var weight = (int)ConfigEntries[(int)weightIndex].BoxedValue;
 
             _logger.LogInfo($"Creating mission: {name}, Weight: {weight}, Enabled: {enabled}");
-
             return new Mission(name, weight, enemies, enabled, rewardPool);
         }
 
@@ -83,6 +101,42 @@ namespace Huntdown
             }
 
             _logger = this.Logger;
+
+            lethalThingsPresent = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("evaisa.lethalthings");
+            if (lethalThingsPresent)
+            {
+                _logger.LogInfo("LethalThings detected.  Zombie missions will be available.");
+            }
+
+            hauntedHarpistPresent = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("LethalCompanyHarpGhost");
+            if (hauntedHarpistPresent)
+            {
+                _logger.LogInfo("Haunted Harpist detected.  Ghost missions will be available.");
+            }
+
+            /*bioDiversityPresent = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.github.biodiversitylc.Biodiversity");
+            if (bioDiversityPresent)
+            {
+                _logger.LogInfo("Biodiversity detected.  The Aloe mission will be available.");
+            }*/
+
+            /*lethalMonPresent = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("LethalMon");
+            if (lethalMonPresent)
+            {
+                _logger.LogInfo("LethalMon detected.  Pokeball rewards will be available.");
+            }*/
+
+            needyCatsPresent = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("Jordo.NeedyCats");
+            if (needyCatsPresent)
+            {
+                _logger.LogInfo("Needy Cats detected.  Cat rewards will be available.");
+            }
+
+            emergencyDicePresent = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("Theronguard.EmergencyDice");
+            if (emergencyDicePresent)
+            {
+                _logger.LogInfo("Emergency Dice detected.  Dice rewards will be available.");
+            }
 
             try
             {
@@ -109,8 +163,14 @@ namespace Huntdown
                     new StoredEnemy(EnemyKey.Masked, "MaskedPlayerEnemy (EnemyType)"),
                     new StoredEnemy(EnemyKey.EyelessDog, "MouthDog (EnemyType)"),
                     new StoredEnemy(EnemyKey.Butler, "Butler (EnemyType)"),
-					new StoredEnemy(EnemyKey.Maneater, "CaveDweller (EnemyType)"),
+                    new StoredEnemy(EnemyKey.Maneater, "CaveDweller (EnemyType)"),
                     new StoredEnemy(EnemyKey.BaboonHawk, "BaboonHawk (EnemyType)"),
+                    new StoredEnemy(EnemyKey.ForestKeeper, "ForestGiant (EnemyType)"),
+                    new StoredEnemy(EnemyKey.Zombie, "Maggie (EnemyType)"),
+                    new StoredEnemy(EnemyKey.HauntedHarpist, "HarpGhost (EnemyType)"),
+                    new StoredEnemy(EnemyKey.PhantomPiper, "BagpipesGhost (EnemyType)"),
+                    new StoredEnemy(EnemyKey.EnforcerGhost, "EnforcerGhost (EnemyType)"),
+                    //new StoredEnemy(EnemyKey.Aloe, "AloeEnemyType (EnemyType)"),
                 };
                 _logger.LogInfo("Keys successfully assigned to enemies.");
             }
@@ -202,6 +262,32 @@ namespace Huntdown
                     new StoredItem(ItemKey.Knife, "Knife (Item)"),
                     new StoredItem(ItemKey.ControlPad, "ControlPad (Item)"),
                     new StoredItem(ItemKey.PlasticCup, "PlasticCup (Item)"),
+                    new StoredItem(ItemKey.BeltBag, "BeltBag (Item)"),
+                    new StoredItem(ItemKey.CaveDwellerBaby, "CaveDwellerBaby (Item)"),
+                    new StoredItem(ItemKey.Pokeball, "Pokeball (Item)"),
+                    new StoredItem(ItemKey.GreatBall, "GreatBall (Item)"),
+                    new StoredItem(ItemKey.UltraBall, "UltraBall (Item)"),
+                    new StoredItem(ItemKey.MasterBall, "MasterBall (Item)"),
+                    new StoredItem(ItemKey.CatItem, "CatItem (Item)"),
+                    new StoredItem(ItemKey.Pouch, "Pouch (Item)"),
+                    new StoredItem(ItemKey.ArsonPlush, "ArsonPlush (Item)"),
+                    new StoredItem(ItemKey.ArsonPlushDirty, "ArsonPlushDirty (Item)"),
+                    new StoredItem(ItemKey.CookieFumo, "CookieFumo (Item)"),
+                    new StoredItem(ItemKey.ToimariPlush, "ToimariPlush (Item)"),
+                    new StoredItem(ItemKey.glizzy, "glizzy (Item)"),
+                    new StoredItem(ItemKey.GhostPlushieItemData, "GhostPlushieItemData (Item)"),
+                    new StoredItem(ItemKey.HamisPlush, "HamisPlush (Item)"),
+                    new StoredItem(ItemKey.GnarpyPlush, "GnarpyPlush (Item)"),
+                    new StoredItem(ItemKey.RocketLauncher, "RocketLauncher (Item)"),
+                    new StoredItem(ItemKey.GremlinEnergy, "GremlinEnergy (Item)"),
+                    new StoredItem(ItemKey.Dingus, "Dingus (Item)"),
+                    new StoredItem(ItemKey.ToyGun, "ToyGun (Item)"),
+                    new StoredItem(ItemKey.Chronos, "Chronos (Item)"),
+                    new StoredItem(ItemKey.GamblerItem, "GamblerItem (Item)"),
+                    new StoredItem(ItemKey.Saint, "Saint (Item)"),
+                    new StoredItem(ItemKey.Sacrificer, "Sacrificer (Item)"),
+                    new StoredItem(ItemKey.SurfacedDieItem, "SurfacedDieItem (Item)"),
+                    new StoredItem(ItemKey.Rusty, "Rusty (Item)"),
                 };
                 _logger.LogInfo("Keys successfully assigned to items.");
             }
@@ -224,11 +310,16 @@ namespace Huntdown
                             _storedItems[(int)ItemKey.Candy],
                             _storedItems[(int)ItemKey.WhoopieCushion],
                             _storedItems[(int)ItemKey.FishTestProp],
-                            _storedItems[(int)ItemKey.SprayPaint],
-                            _storedItems[(int)ItemKey.TZPInhalant],
-                            _storedItems[(int)ItemKey.StunGrenade],
+                            (bool)ConfigEntries[(int)ConfigIndexes.EnableToolRewards].BoxedValue ? _storedItems[(int)ItemKey.SprayPaint] : null,
+                            (bool)ConfigEntries[(int)ConfigIndexes.EnableToolRewards].BoxedValue ? _storedItems[(int)ItemKey.TZPInhalant] : null,
+                            (bool)ConfigEntries[(int)ConfigIndexes.EnableToolRewards].BoxedValue ? _storedItems[(int)ItemKey.StunGrenade] : null,
                             _storedItems[(int)ItemKey.EasterEgg],
-                            _storedItems[(int)ItemKey.WeedKillerBottle],
+                            (bool)ConfigEntries[(int)ConfigIndexes.EnableToolRewards].BoxedValue ? _storedItems[(int)ItemKey.BeltBag] : null,
+                            _storedItems[(int)ItemKey.DustPan],
+                            _storedItems[(int)ItemKey.Brush],
+                            //lethalMonPresent ? _storedItems[(int)ItemKey.Pokeball] : null,
+                            lethalThingsPresent ? _storedItems[(int)ItemKey.glizzy] : null,
+                            lethalThingsPresent ? _storedItems[(int)ItemKey.ToyGun] : null,
                         },
                         ConfigIndexes.RewardLow
                     ),
@@ -245,6 +336,19 @@ namespace Huntdown
                             _storedItems[(int)ItemKey.MagnifyingGlass],
                             _storedItems[(int)ItemKey.Dentures],
                             _storedItems[(int)ItemKey.GarbageLid],
+                            //lethalMonPresent ? _storedItems[(int)ItemKey.GreatBall] : null,
+                            hauntedHarpistPresent ? _storedItems[(int)ItemKey.GhostPlushieItemData] : null,
+                            lethalThingsPresent ? _storedItems[(int)ItemKey.HamisPlush] : null,
+                            lethalThingsPresent ? _storedItems[(int)ItemKey.GremlinEnergy] : null,
+                            (bool)ConfigEntries[(int)ConfigIndexes.EnableToolRewards].BoxedValue && lethalThingsPresent
+                                ? _storedItems[(int)ItemKey.RocketLauncher]
+    :                           null,
+                            (bool)ConfigEntries[(int)ConfigIndexes.EnableToolRewards].BoxedValue && lethalThingsPresent
+                                ? _storedItems[(int)ItemKey.Pouch]
+    :                           null,
+                            lethalThingsPresent ? _storedItems[(int)ItemKey.ToimariPlush] : null,
+                            emergencyDicePresent ? _storedItems[(int)ItemKey.SurfacedDieItem] : null,
+                            emergencyDicePresent ? _storedItems[(int)ItemKey.Sacrificer] : null,
                         },
                         ConfigIndexes.RewardMedium
                     ),
@@ -258,13 +362,20 @@ namespace Huntdown
                             _storedItems[(int)ItemKey.PerfumeBottle],
                             _storedItems[(int)ItemKey.FancyCup],
                             _storedItems[(int)ItemKey.FancyLamp],
-                            _storedItems[(int)ItemKey.Jetpack],
-                            _storedItems[(int)ItemKey.ZapGun],
-                            _storedItems[(int)ItemKey.Knife],
+                            (bool)ConfigEntries[(int)ConfigIndexes.EnableToolRewards].BoxedValue ? _storedItems[(int)ItemKey.Jetpack] : null,
+                            (bool)ConfigEntries[(int)ConfigIndexes.EnableToolRewards].BoxedValue ? _storedItems[(int)ItemKey.ZapGun] : null,
                             _storedItems[(int)ItemKey.ToyTrain],
                             _storedItems[(int)ItemKey.SoccerBall],
                             _storedItems[(int)ItemKey.ControlPad],
                             _storedItems[(int)ItemKey.ToiletPaperRolls],
+                            //lethalMonPresent ? _storedItems[(int)ItemKey.UltraBall] : null,
+                            needyCatsPresent ? _storedItems[(int)ItemKey.CatItem] : null,
+                            lethalThingsPresent ? _storedItems[(int)ItemKey.ArsonPlush] : null,
+                            lethalThingsPresent ? _storedItems[(int)ItemKey.ArsonPlushDirty] : null,
+                            lethalThingsPresent ? _storedItems[(int)ItemKey.CookieFumo] : null,
+                            lethalThingsPresent ? _storedItems[(int)ItemKey.GnarpyPlush] : null,
+                            emergencyDicePresent ? _storedItems[(int)ItemKey.Chronos] : null,
+                            emergencyDicePresent ? _storedItems[(int)ItemKey.Rusty] : null,
                         },
                         ConfigIndexes.RewardHigh
                     ),
@@ -275,9 +386,13 @@ namespace Huntdown
                         {
                             _storedItems[(int)ItemKey.GoldBar],
                             _storedItems[(int)ItemKey.CashRegister],
-                            _storedItems[(int)ItemKey.MapDevice],
+                            (bool)ConfigEntries[(int)ConfigIndexes.EnableToolRewards].BoxedValue ? _storedItems[(int)ItemKey.MapDevice] : null,
                             _storedItems[(int)ItemKey.Zeddog],
                             _storedItems[(int)ItemKey.PlasticCup],
+                            //lethalMonPresent ? _storedItems[(int)ItemKey.MasterBall] : null,
+                            lethalThingsPresent ? _storedItems[(int)ItemKey.Dingus] : null,
+                            emergencyDicePresent ? _storedItems[(int)ItemKey.Saint] : null,
+                            needyCatsPresent ? _storedItems[(int)ItemKey.CatItem] : null,
                         },
                         ConfigIndexes.RewardExtreme
                     ),
@@ -290,6 +405,20 @@ namespace Huntdown
                             _storedItems[(int)ItemKey.ComedyMask],
                         },
                         ConfigIndexes.RewardMedium
+                    ),
+
+                    CreateRewardPool
+                    (
+                        new StoredItem[]
+                        {
+                            _storedItems[(int)ItemKey.Zeddog],
+                            _storedItems[(int)ItemKey.PlasticCup],
+                            //lethalMonPresent ? _storedItems[(int)ItemKey.MasterBall] : null,
+                            lethalThingsPresent ? _storedItems[(int)ItemKey.Dingus] : null,
+                            emergencyDicePresent ? _storedItems[(int)ItemKey.Saint] : null,
+                            needyCatsPresent ? _storedItems[(int)ItemKey.CatItem] : null,
+                        },
+                        ConfigIndexes.RewardBrutal
                     )
                 };
                 _logger.LogInfo("Reward pools successfully created.");
@@ -302,10 +431,9 @@ namespace Huntdown
             try
             {
                 _logger.LogInfo("Creating missions with information from player configuration.");
-                _possibleMissions = new Mission[]
+                List<Mission> missionsList = new List<Mission>()
                 {
-                    CreateMission
-                    (
+                    CreateMission(
                         "Snare Flea",
                         ConfigIndexes.WeightFlea,
                         CreateEnemyDictionary((EnemyKey.SnareFlea, 1)),
@@ -313,8 +441,7 @@ namespace Huntdown
                         _possibleRewardPools[(int)RewardPoolKey.SmallRewardPool]
                     ),
 
-                    CreateMission
-                    (
+                    CreateMission(
                         "Bunker Spider",
                         ConfigIndexes.WeightSpider,
                         CreateEnemyDictionary((EnemyKey.BunkerSpider, 1)),
@@ -322,8 +449,8 @@ namespace Huntdown
                         _possibleRewardPools[(int)RewardPoolKey.MediumRewardPool]
                     ),
 
-                    CreateMission
-                    (
+                    // Poor hoarding bug...
+                    CreateMission(
                         "Hoarding Bug",
                         ConfigIndexes.WeightHoarder,
                         CreateEnemyDictionary((EnemyKey.HoarderBug, 1)),
@@ -331,8 +458,7 @@ namespace Huntdown
                         _possibleRewardPools[(int)RewardPoolKey.SmallRewardPool]
                     ),
 
-                    CreateMission
-                    (
+                    CreateMission(
                         "Bracken",
                         ConfigIndexes.WeightBracken,
                         CreateEnemyDictionary((EnemyKey.Bracken, 1)),
@@ -340,8 +466,7 @@ namespace Huntdown
                         _possibleRewardPools[(int)RewardPoolKey.LargeRewardPool]
                     ),
 
-                    CreateMission
-                    (
+                    CreateMission(
                         "Thumper",
                         ConfigIndexes.WeightThumper,
                         CreateEnemyDictionary((EnemyKey.Thumper, 1)),
@@ -349,8 +474,7 @@ namespace Huntdown
                         _possibleRewardPools[(int)RewardPoolKey.MediumRewardPool]
                     ),
 
-                    CreateMission
-                    (
+                    CreateMission(
                         "Nutcracker",
                         ConfigIndexes.WeightNutcracker,
                         CreateEnemyDictionary((EnemyKey.Nutcracker, 1)),
@@ -358,8 +482,7 @@ namespace Huntdown
                         _possibleRewardPools[(int)RewardPoolKey.LargeRewardPool]
                     ),
 
-                    CreateMission
-                    (
+                    CreateMission(
                         "Masked",
                         ConfigIndexes.WeightMasked,
                         CreateEnemyDictionary((EnemyKey.Masked, 1)),
@@ -367,8 +490,7 @@ namespace Huntdown
                         _possibleRewardPools[(int)RewardPoolKey.MaskRewardPool]
                     ),
 
-                    CreateMission
-                    (
+                    CreateMission(
                         "A Good Boy",
                         ConfigIndexes.WeightDog,
                         CreateEnemyDictionary((EnemyKey.EyelessDog, 1)),
@@ -376,17 +498,15 @@ namespace Huntdown
                         _possibleRewardPools[(int)RewardPoolKey.HugeRewardPool]
                     ),
 
-                    CreateMission
-                    (
+                    CreateMission(
                         "Bug Mafia",
                         ConfigIndexes.WeightMafia,
                         CreateEnemyDictionary((EnemyKey.HoarderBug, 5)),
                         ConfigIndexes.ToggleMafia,
-                        _possibleRewardPools[(int)RewardPoolKey.MediumRewardPool]
+                        _possibleRewardPools[(int)RewardPoolKey.LargeRewardPool]
                     ),
 
-                    CreateMission
-                    (
+                    CreateMission(
                         "Blunderbug",
                         ConfigIndexes.WeightBlunderbug,
                         CreateEnemyDictionary((EnemyKey.HoarderBug, 1)),
@@ -394,12 +514,10 @@ namespace Huntdown
                         _possibleRewardPools[(int)RewardPoolKey.MediumRewardPool]
                     ),
 
-                    CreateMission
-                    (
+                    CreateMission(
                         "Infestation",
                         ConfigIndexes.WeightInfestation,
-                        CreateEnemyDictionary
-                        (
+                        CreateEnemyDictionary(
                             (EnemyKey.HoarderBug, 2),
                             (EnemyKey.SnareFlea, 2),
                             (EnemyKey.BunkerSpider, 1)
@@ -408,57 +526,164 @@ namespace Huntdown
                         _possibleRewardPools[(int)RewardPoolKey.LargeRewardPool]
                     ),
 
-                    CreateMission
-                    (
+                    CreateMission(
                         "Last Month's Interns",
                         ConfigIndexes.WeightLastcrew,
-                        CreateEnemyDictionary
-                        (
+                        CreateEnemyDictionary(
                             (EnemyKey.Masked, 4)
                         ),
                         ConfigIndexes.ToggleLastcrew,
                         _possibleRewardPools[(int)RewardPoolKey.HugeRewardPool]
                     ),
 
-                    CreateMission
-                    (
+                    CreateMission(
                         "Butler",
                         ConfigIndexes.WeightButler,
-                        CreateEnemyDictionary
-                        (
+                        CreateEnemyDictionary(
                             (EnemyKey.Butler, 1)
                         ),
                         ConfigIndexes.ToggleButler,
                         _possibleRewardPools[(int)RewardPoolKey.MediumRewardPool]
                     ),
 
-					CreateMission
-					(
-						"Maneater",
-						ConfigIndexes.WeightManeater,
-						CreateEnemyDictionary
-						(
-							(EnemyKey.Maneater, 1)
-						),
-						ConfigIndexes.ToggleManeater,
-						_possibleRewardPools[(int)RewardPoolKey.HugeRewardPool]
-					),
+                    CreateMission(
+                        "Maneater",
+                        ConfigIndexes.WeightManeater,
+                        CreateEnemyDictionary(
+                            (EnemyKey.Maneater, 1)
+                        ),
+                        ConfigIndexes.ToggleManeater,
+                        _possibleRewardPools[(int)RewardPoolKey.HugeRewardPool]
+                    ),
 
-                    CreateMission
-                    (
+                   CreateMission(
+                        "Stabbin' Bros",
+                        ConfigIndexes.WeightStabbinBros,
+                        CreateEnemyDictionary(
+                            (EnemyKey.HoarderBug, 3),
+                            (EnemyKey.Butler, 2)
+                        ),
+                        ConfigIndexes.ToggleStabbinBros,
+                        _possibleRewardPools[(int)RewardPoolKey.LargeRewardPool]
+                    ),
+
+                   CreateMission(
+                        "Giant Size: Upgraded",
+                        ConfigIndexes.WeightGiantSize,
+                        CreateEnemyDictionary(
+                            (EnemyKey.Random, 1)
+                        ),
+                        ConfigIndexes.ToggleGiantSize,
+                        _possibleRewardPools[(int)RewardPoolKey.BrutalRewardPool]
+                    ),
+
+                   CreateMission(
+                        "Big Trouble Little Enemies",
+                        ConfigIndexes.WeightLittleEnemies,
+                        CreateEnemyDictionary(
+                            (EnemyKey.Random, 15)
+                        ),
+                        ConfigIndexes.ToggleLittleEnemies,
+                        _possibleRewardPools[(int)RewardPoolKey.BrutalRewardPool]
+                    ),
+
+                   CreateMission(
+                        "Who let the puppies out?",
+                        ConfigIndexes.WeightPuppies,
+                        CreateEnemyDictionary(
+                            (EnemyKey.EyelessDog, 12)
+                        ),
+                        ConfigIndexes.TogglePuppies,
+                        _possibleRewardPools[(int)RewardPoolKey.BrutalRewardPool]
+                    ),
+
+                    CreateMission(
                         "Baboon Gang",
                         ConfigIndexes.WeightBaboonGang,
-                        CreateEnemyDictionary
-                        (
+                        CreateEnemyDictionary(
                             (EnemyKey.BaboonHawk, 3)
                         ),
                         ConfigIndexes.ToggleBaboonGang,
                         _possibleRewardPools[(int)RewardPoolKey.LargeRewardPool]
                     ),
 
+                    CreateMission(
+                        "Facility Keeper",
+                        ConfigIndexes.WeightFacilityKeeper,
+                        CreateEnemyDictionary(
+                            (EnemyKey.ForestKeeper, 1)
+                        ),
+                        ConfigIndexes.ToggleFacilityKeeper,
+                        _possibleRewardPools[(int)RewardPoolKey.LargeRewardPool]
+                    ),
                 };
+
+                if (lethalThingsPresent)
+                {
+                    missionsList.Add(CreateMission(
+                        "Zombie",
+                        ConfigIndexes.WeightZombie,
+                        CreateEnemyDictionary((EnemyKey.Zombie, 1)),
+                        ConfigIndexes.ToggleZombie,
+                        _possibleRewardPools[(int)RewardPoolKey.MediumRewardPool]
+                    ));
+
+                    missionsList.Add(CreateMission(
+                        "Last Year's Interns",
+                        ConfigIndexes.WeightZombieCrew,
+                        CreateEnemyDictionary((EnemyKey.Zombie, 4)),
+                        ConfigIndexes.ToggleZombieCrew,
+                        _possibleRewardPools[(int)RewardPoolKey.HugeRewardPool]
+                    ));
+
+                    missionsList.Add(CreateMission(
+                        "Zombie Apocalypse",
+                        ConfigIndexes.WeightZombieApocalypse,
+                        CreateEnemyDictionary((EnemyKey.Zombie, 15)),
+                        ConfigIndexes.ToggleZombieApocalypse,
+                        _possibleRewardPools[(int)RewardPoolKey.BrutalRewardPool]
+                    ));
+                }
+
+                if (hauntedHarpistPresent)
+                {
+                    missionsList.Add(CreateMission(
+                        "Haunted Harpist",
+                        ConfigIndexes.WeightHauntedHarpist,
+                        CreateEnemyDictionary((EnemyKey.HauntedHarpist, 1)),
+                        ConfigIndexes.ToggleHauntedHarpist,
+                        _possibleRewardPools[(int)RewardPoolKey.MediumRewardPool]
+                    ));
+
+                    missionsList.Add(CreateMission(
+                        "Phantom Piper",
+                        ConfigIndexes.WeightPhantomPiper,
+                        CreateEnemyDictionary((EnemyKey.PhantomPiper, 1)),
+                        ConfigIndexes.TogglePhantomPiper,
+                        _possibleRewardPools[(int)RewardPoolKey.LargeRewardPool]
+                    ));
+
+                    missionsList.Add(CreateMission(
+                        "Enforcer",
+                        ConfigIndexes.WeightEnforcerGhost,
+                        CreateEnemyDictionary((EnemyKey.EnforcerGhost, 1)),
+                        ConfigIndexes.ToggleEnforcerGhost,
+                        _possibleRewardPools[(int)RewardPoolKey.MediumRewardPool]
+                    ));
+
+                    missionsList.Add(CreateMission(
+                        "The Firing Squad",
+                        ConfigIndexes.WeightFiringSquad,
+                        CreateEnemyDictionary((EnemyKey.EnforcerGhost, 4), (EnemyKey.Nutcracker, 1)),
+                        ConfigIndexes.ToggleFiringSquad,
+                        _possibleRewardPools[(int)RewardPoolKey.HugeRewardPool]
+                    ));
+                }
+
+                _possibleMissions = missionsList.ToArray();
                 _logger.LogInfo("Missions successfully created.");
             }
+
             catch (Exception ex)
             {
                 _logger.LogError("Could not create missions.\n" + ex.Message);

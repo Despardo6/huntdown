@@ -15,6 +15,13 @@ namespace Huntdown
         Butler,
         Maneater,
         BaboonHawk,
+        ForestKeeper,
+        Zombie,
+        HauntedHarpist,
+        PhantomPiper,
+        EnforcerGhost,
+        Random,
+        Aloe,
     }
 
     public class StoredEnemy

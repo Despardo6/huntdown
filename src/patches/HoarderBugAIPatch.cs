@@ -56,6 +56,37 @@ namespace Huntdown.Patches
                         }
                     }
 
+                    else if (_currentMission.Name == "Stabbin' Bros")
+                    {
+                        for (int j = 0; j < StartOfRound.Instance.allItemsList.itemsList.Count; j++)
+                        {
+                            if (StartOfRound.Instance.allItemsList.itemsList[j].ToString() == _storedItems[(int)ItemKey.Knife].ID)
+                            {
+                                GameObject obj = Object.Instantiate(StartOfRound.Instance.allItemsList.itemsList[j].spawnPrefab, __instance.serverPosition, Quaternion.identity, StartOfRound.Instance.propsContainer);
+                                obj.GetComponent<GrabbableObject>().fallTime = 0f;
+                                obj.GetComponent<GrabbableObject>().SetScrapValue(UnityEngine.Random.Range(4, 7));
+                                NetworkObject netObj = obj.GetComponent<NetworkObject>();
+
+
+                                GrabbableObject component = netObj.gameObject.GetComponent<GrabbableObject>();
+                                __instance.targetItem = null;
+                                //__instance.targetItem = component;
+                                HoarderBugAI.HoarderBugItems.Add(new HoarderBugItem(component, HoarderBugItemStatus.Owned, __instance.nestPosition));
+                                __instance.heldItem = HoarderBugAI.HoarderBugItems[HoarderBugAI.HoarderBugItems.Count - 1];
+                                //__instance.heldItem = null;
+                                component.parentObject = __instance.grabTarget;
+                                component.hasHitGround = false;
+                                component.isHeldByEnemy = true;
+                                component.grabbableToEnemies = false;
+                                component.grabbable = true;
+                                component.GrabItemFromEnemy(__instance);
+                                component.EnablePhysics(enable: false);
+                                netObj.Spawn();
+                                __instance.GrabItemServerRpc(netObj);
+                            }
+                        }
+                    }
+
                     else if (_currentMission.Name == "Blunderbug")
                     {
                         for (int j = 0; j < StartOfRound.Instance.allItemsList.itemsList.Count; j++)
@@ -120,7 +151,7 @@ namespace Huntdown.Patches
 
             for (int i = 0; i < Mission.AliveEnemies.Count; i++)
             {
-                if (__instance == Mission.AliveEnemies[i] && !__instance.isEnemyDead && (_currentMission.Name == "Bug Mafia" || _currentMission.Name == "Blunderbug"))
+                if (__instance == Mission.AliveEnemies[i] && !__instance.isEnemyDead && (_currentMission.Name == "Bug Mafia" || _currentMission.Name == "Blunderbug" || _currentMission.Name == "Stabbin' Bros"))
                 {
                     // logger.LogMessage("Tried to drop item, but it was covered in glue!");
                     // ___waitingAtNest = false;

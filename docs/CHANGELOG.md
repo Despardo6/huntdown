@@ -1,3 +1,23 @@
+### 1.6.0
+- Added option to turn on/off tool mission rewards (tools from other supported mods are included in list)
+- Added option to use subText of target scan node instead of headerText. For example instead of replacing "Snare Flea" title, it will put "TARGET" label below it instead
+- Removed Kitchen Knife and Weed Killer from reward pools
+- Added new Tactical Belt Bag to easy reward pool
+- Hopefully fixed model of Bunker Spider or other enemies sometimes being stuck on side of ship forever
+- Fixed "Bug Mafia" being a medium difficulty mission despite it being labeled as "Hard" mission in config
+- Added a new mission, "Giant Size: Upgraded", along with their config options
+- Added a new mission, "Big Trouble Little Enemies", along with their config 
+- Added a new mission, "Who let the puppies out?", along with their config options
+- Added a new mission, "Stabbin' Bros", along with their config options
+- Added a new mission, "Facility Keeper", along with their config options (Disabled by default due to clients needing StarlancerAIFix for outside enemies to work inside.)
+- Made mission "Baboon Gang" be disabled by default due to clients needing StarlancerAIFix for outside enemies to work inside
+- Added support for "LethalThings" mod, you will now be able to get new missions related to Zombie enemy from it: "Zombie", "Last Year's Interns" and "Zombie Apocalypse". Also you can get some of it's scrap and tools as mission rewards too!
+- Added support for "Haunted Harpist" mod, you will now be able to get new missions related to ghosts from it: "Haunted Harpist", "Phantom Piper", "Ethereal Enforcer" and "The Firing Squad". As a bonus you can also get it's "Ghost Plushie" scrap as mission reward
+- Added support for "Needy Cats" mod, you will be able to get a random cat as a mission reward
+- Added support for "Emergency Dice Updated" mod, you will be able to get it's Dices as mission rewards
+- Added new difficulty reward "Brutal". It's worth 400 by default
+- Updated README to reflect the changes
+
 ### 1.5.2
 
 - Added a new mission, "Maneater", along with their config options

@@ -10,7 +10,8 @@ namespace Huntdown
     {
         DisplayTarget,
         GeneralPercentageChance,
-        ToggleWeightDynamic
+        ToggleWeightDynamic,
+        ChangeSubtext
     }
 
     public enum RewardConfigKey
@@ -67,6 +68,8 @@ namespace Huntdown
             DisplayTarget,
             GeneralPercentageChance,
             ToggleWeightDynamic,
+            ChangeSubtext,
+            EnableToolRewards,
 
             ///////////////////////////////////////////////////////
 
@@ -84,11 +87,23 @@ namespace Huntdown
             ToggleLastcrew,
             ToggleButler,
 			ToggleManeater,
+            ToggleStabbinBros,
+            ToggleGiantSize,
+            ToggleLittleEnemies,
+            TogglePuppies,
             ToggleBaboonGang,
+            ToggleFacilityKeeper,
+            ToggleZombie,
+            ToggleZombieCrew,
+            ToggleZombieApocalypse,
+            ToggleHauntedHarpist,
+            TogglePhantomPiper,
+            ToggleEnforcerGhost,
+            ToggleFiringSquad,
 
-			///////////////////////////////////////////////////////
+            ///////////////////////////////////////////////////////
 
-			WeightFlea,
+            WeightFlea,
             WeightSpider,
             WeightHoarder,
             WeightBracken,
@@ -102,14 +117,27 @@ namespace Huntdown
             WeightLastcrew,
             WeightButler,
 			WeightManeater,
+            WeightStabbinBros,
+            WeightGiantSize,
+            WeightLittleEnemies,
+            WeightPuppies,
             WeightBaboonGang,
+            WeightFacilityKeeper,
+            WeightZombie,
+            WeightZombieCrew,
+            WeightZombieApocalypse,
+            WeightHauntedHarpist,
+            WeightPhantomPiper,
+            WeightEnforcerGhost,
+            WeightFiringSquad,
 
-			///////////////////////////////////////////////////////
+            ///////////////////////////////////////////////////////
 
-			RewardLow,
+            RewardLow,
             RewardMedium,
             RewardHigh,
-            RewardExtreme
+            RewardExtreme,
+            RewardBrutal
         }
 
         public static readonly ConfigurableSetting[] AllConfigurableSettings = new ConfigurableSetting[]
@@ -139,6 +167,24 @@ namespace Huntdown
                 Key = "Dynamic Weighting System",
                 DefaultValue = true,
                 Description = new ConfigDescription("Makes it more likely to get missions you haven't been given yet to keep things fresh.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.ChangeSubtext,
+                Section = ConfigSections.General.GetDescription(),
+                Key = "Change ScanNode Subtext",
+                DefaultValue = false,
+                Description = new ConfigDescription("If true, changes the ScanNode's subText instead of headerText for 'TARGET' label.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.EnableToolRewards,
+                Section = ConfigSections.General.GetDescription(),
+                Key = "Enable Tool Rewards",
+                DefaultValue = true,
+                Description = new ConfigDescription("If true, tool items will be included in reward pools.")
             },
 
             ///////////////////////////////////////////////////////
@@ -271,11 +317,119 @@ namespace Huntdown
 
             new ConfigurableSetting
             {
+                Index = ConfigIndexes.ToggleStabbinBros,
+                Section = ConfigSections.Toggle.GetDescription(),
+                Key = "Stabbin Bros Mission Enabled",
+                DefaultValue = true,
+                Description = new ConfigDescription("Whether the Stabbin' Bros can be assigned as the hunt target or not.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.ToggleGiantSize,
+                Section = ConfigSections.Toggle.GetDescription(),
+                Key = "Giant Size Upgraded Mission Enabled",
+                DefaultValue = true,
+                Description = new ConfigDescription("Whether the Giant Size: Upgraded can be assigned as the hunt target or not.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.ToggleLittleEnemies,
+                Section = ConfigSections.Toggle.GetDescription(),
+                Key = "Big Trouble Little Enemies Mission Enabled",
+                DefaultValue = true,
+                Description = new ConfigDescription("Whether the Big Trouble Little Enemies can be assigned as the hunt target or not.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.TogglePuppies,
+                Section = ConfigSections.Toggle.GetDescription(),
+                Key = "Who let the puppies out Mission Enabled",
+                DefaultValue = true,
+                Description = new ConfigDescription("Whether the Who let the puppies out? (12 tiny dogs) can be assigned as the hunt target or not.")
+            },
+
+            new ConfigurableSetting
+            {
                 Index = ConfigIndexes.ToggleBaboonGang,
                 Section = ConfigSections.Toggle.GetDescription(),
                 Key = "Baboon Gang Mission Enabled",
+                DefaultValue = false,
+                Description = new ConfigDescription("Whether the Baboon Gang (3 baboon hawks) can be assigned as the hunt target or not. (Disabled by default due to clients needing StarlancerAIFix for outside enemies to work inside.)")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.ToggleFacilityKeeper,
+                Section = ConfigSections.Toggle.GetDescription(),
+                Key = "Facility Keeper Mission Enabled",
+                DefaultValue = false,
+                Description = new ConfigDescription("Whether the Facility Keeper can be assigned as the hunt target or not. (Disabled by default due to clients needing StarlancerAIFix for outside enemies to work inside.)")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.ToggleZombie,
+                Section = ConfigSections.Toggle.GetDescription(),
+                Key = "Zombie Mission Enabled",
                 DefaultValue = true,
-                Description = new ConfigDescription("Whether the Baboon Gang (3 baboon hawks) can be assigned as the hunt target or not.")
+                Description = new ConfigDescription("(Will be target only if LethalThings mod is present.) Whether the Zombie can be assigned as the hunt target or not.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.ToggleZombieCrew,
+                Section = ConfigSections.Toggle.GetDescription(),
+                Key = "Last Years Interns Mission Enabled",
+                DefaultValue = true,
+                Description = new ConfigDescription("(Will be target only if LethalThings mod is present.) Whether the Last Year's Interns (4 Zombies) can be assigned as the hunt target or not.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.ToggleZombieApocalypse,
+                Section = ConfigSections.Toggle.GetDescription(),
+                Key = "Zombie Apocalypse Mission Enabled",
+                DefaultValue = true,
+                Description = new ConfigDescription("(Will be target only if LethalThings mod is present.) Whether the Zombie Apocalypse (15 Zombies) can be assigned as the hunt target or not.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.ToggleHauntedHarpist,
+                Section = ConfigSections.Toggle.GetDescription(),
+                Key = "Haunted Harpist Mission Enabled",
+                DefaultValue = true,
+                Description = new ConfigDescription("(Will be target only if Haunted Harpist mod is present.) Whether the Haunted Harpist can be assigned as the hunt target or not.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.TogglePhantomPiper,
+                Section = ConfigSections.Toggle.GetDescription(),
+                Key = "Phantom Piper Mission Enabled",
+                DefaultValue = true,
+                Description = new ConfigDescription("(Will be target only if Haunted Harpist mod is present.) Whether the Phantom Piper can be assigned as the hunt target or not.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.ToggleEnforcerGhost,
+                Section = ConfigSections.Toggle.GetDescription(),
+                Key = "Ethereal Enforcer Mission Enabled",
+                DefaultValue = true,
+                Description = new ConfigDescription("(Will be target only if Haunted Harpist mod is present.) Whether the Ethereal Enforcer can be assigned as the hunt target or not.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.ToggleFiringSquad,
+                Section = ConfigSections.Toggle.GetDescription(),
+                Key = "The Firing Squad Mission Enabled",
+                DefaultValue = true,
+                Description = new ConfigDescription("(Will be target only if Haunted Harpist mod is present.) Whether the The Firing Squad (4 Ethereal Enforcers and 1 Nutcracker) can be assigned as the hunt target or not.")
             },
 
             ///////////////////////////////////////////////////////
@@ -408,11 +562,119 @@ namespace Huntdown
 
             new ConfigurableSetting
             {
+                Index = ConfigIndexes.WeightStabbinBros,
+                Section = ConfigSections.Weight.GetDescription(),
+                Key = "Stabbin Bros Mission Weight",
+                DefaultValue = 40,
+                Description = new ConfigDescription("Higher value = more likely. The likelihood that the Stabbin' Bros will be the target.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.WeightGiantSize,
+                Section = ConfigSections.Weight.GetDescription(),
+                Key = "Giant Size Upgraded Mission Weight",
+                DefaultValue = 20,
+                Description = new ConfigDescription("Higher value = more likely. The likelihood that the Giant Size: Upgraded will be the target.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.WeightLittleEnemies,
+                Section = ConfigSections.Weight.GetDescription(),
+                Key = "Big Trouble Little Enemies Mission Weight",
+                DefaultValue = 20,
+                Description = new ConfigDescription("Higher value = more likely. The likelihood that the Big Trouble Little Enemies will be the target.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.WeightPuppies,
+                Section = ConfigSections.Weight.GetDescription(),
+                Key = "Who let the puppies out Mission Weight",
+                DefaultValue = 20,
+                Description = new ConfigDescription("Higher value = more likely. The likelihood that the Who let the puppies out? will be the target.")
+            },
+
+            new ConfigurableSetting
+            {
                 Index = ConfigIndexes.WeightBaboonGang,
                 Section = ConfigSections.Weight.GetDescription(),
                 Key = "Baboon Gang Mission Weight",
-                DefaultValue = 30,
+                DefaultValue = 40,
                 Description = new ConfigDescription("Higher value = more likely. The likelihood that the Baboon Gang will be the target.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.WeightFacilityKeeper,
+                Section = ConfigSections.Weight.GetDescription(),
+                Key = "Facility Keeper Mission Weight",
+                DefaultValue = 25,
+                Description = new ConfigDescription("Higher value = more likely. The likelihood that the Facility Keeper will be the target.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.WeightZombie,
+                Section = ConfigSections.Weight.GetDescription(),
+                Key = "Zombie Mission Weight",
+                DefaultValue = 75,
+                Description = new ConfigDescription("(Will be target only if LethalThings mod is present.) Higher value = more likely. The likelihood that the Zombie will be the target.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.WeightZombieCrew,
+                Section = ConfigSections.Weight.GetDescription(),
+                Key = "Last Years Interns Mission Weight",
+                DefaultValue = 15,
+                Description = new ConfigDescription("(Will be target only if LethalThings mod is present.) Higher value = more likely. The likelihood that the Last Year's Interns will be the target.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.WeightZombieApocalypse,
+                Section = ConfigSections.Weight.GetDescription(),
+                Key = "Zombie Apocalypse Mission Weight",
+                DefaultValue = 8,
+                Description = new ConfigDescription("(Will be target only if LethalThings mod is present.) Higher value = more likely. The likelihood that the Zombie Apocalypse will be the target.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.WeightHauntedHarpist,
+                Section = ConfigSections.Weight.GetDescription(),
+                Key = "Haunted Harpist Mission Weight",
+                DefaultValue = 30,
+                Description = new ConfigDescription("(Will be target only if Haunted Harpist mod is present.) Higher value = more likely. The likelihood that the Haunted Harpist will be the target.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.WeightPhantomPiper,
+                Section = ConfigSections.Weight.GetDescription(),
+                Key = "Phantom Piper Mission Weight",
+                DefaultValue = 20,
+                Description = new ConfigDescription("(Will be target only if Haunted Harpist mod is present.) Higher value = more likely. The likelihood that the Phantom Piper will be the target.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.WeightEnforcerGhost,
+                Section = ConfigSections.Weight.GetDescription(),
+                Key = "Ethereal Enforcer Mission Weight",
+                DefaultValue = 50,
+                Description = new ConfigDescription("(Will be target only if Haunted Harpist mod is present.) Higher value = more likely. The likelihood that the Ethereal Enforcer will be the target.")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.WeightFiringSquad,
+                Section = ConfigSections.Weight.GetDescription(),
+                Key = "The Firing Squad Mission Weight",
+                DefaultValue = 30,
+                Description = new ConfigDescription("(Will be target only if Haunted Harpist mod is present.) Higher value = more likely. The likelihood that the The Firing Squad will be the target.")
             },
 
             ///////////////////////////////////////////////////////
@@ -432,7 +694,7 @@ namespace Huntdown
                 Section = ConfigSections.Reward.GetDescription(),
                 Key = "Medium Mission Reward",
                 DefaultValue = 100,
-                Description = new ConfigDescription("How much the scrap dropped from a medium mission is worth (Thumper, Bunker Spider, Masked, Butler, Blunderbug).")
+                Description = new ConfigDescription("How much the scrap dropped from a medium mission is worth (Thumper, Bunker Spider, Masked, Butler, Blunderbug, Zombie, Ethereal Enforcer, Haunted Harpist).")
             },
 
             new ConfigurableSetting
@@ -441,7 +703,7 @@ namespace Huntdown
                 Section = ConfigSections.Reward.GetDescription(),
                 Key = "Hard Mission Reward",
                 DefaultValue = 200,
-                Description = new ConfigDescription("How much the scrap dropped from a hard mission is worth (Bracken, Nutcracker, Bug Mafia, Infestation, Baboon Gang).")
+                Description = new ConfigDescription("How much the scrap dropped from a hard mission is worth (Bracken, Nutcracker, Bug Mafia, Infestation, Baboon Gang, Stabbin' Bros, Facility Keeper, Phantom Piper).")
             },
 
             new ConfigurableSetting
@@ -450,7 +712,16 @@ namespace Huntdown
                 Section = ConfigSections.Reward.GetDescription(),
                 Key = "Extreme Mission Reward",
                 DefaultValue = 300,
-                Description = new ConfigDescription("How much the scrap dropped from an extreme mission is worth (Good Boy, Last Months Interns, Maneater).")
+                Description = new ConfigDescription("How much the scrap dropped from an extreme mission is worth (Good Boy, Last Month's Interns, Maneater, Last Year's Interns).")
+            },
+
+            new ConfigurableSetting
+            {
+                Index = ConfigIndexes.RewardBrutal,
+                Section = ConfigSections.Reward.GetDescription(),
+                Key = "Brutal Mission Reward",
+                DefaultValue = 400,
+                Description = new ConfigDescription("How much the scrap dropped from an extreme mission is worth (Giant Size: Upgraded, Big Trouble Little Enemies, Who let the puppies out?, Zombie Apocalypse).")
             },
         };
 
