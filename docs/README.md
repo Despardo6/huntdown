@@ -40,10 +40,10 @@ Your mission will be displayed to all members of your team in the chat once you 
 - <details><summary>The Firing Squad (Haunted Harpist) (Spoiler)</summary>A squad featuring 4 Ethereal Enforcers and a Nutcracker</details>
 
 **Supported Mods that can add extra mission targets or mission rewards:**
-<details><summary>LethalThings</summary>3 extra missions and bunch of new items for reward pools</details
-<details><summary>Haunted Harpist</summary>4 extra missions and it's Ghost Plushie added to medium reward pool</details
-<details><summary>Needy Cats</summary>You can get a random Cat as reward in "Hard", "Extreme" and "Brutal" mission targets</details
-<details><summary>Emergency Dice Updated</summary>It's dices are added to reward pools</details
+- <details><summary>LethalThings</summary>3 extra missions and bunch of new items for reward pools</details
+- <details><summary>Haunted Harpist</summary>4 extra missions and it's Ghost Plushie added to medium reward pool</details
+- <details><summary>Needy Cats</summary>You can get a random Cat as reward in "Hard", "Extreme" and "Brutal" mission targets</details
+- <details><summary>Emergency Dice Updated</summary>It's dices are added to reward pools</details
 
 **Known Incompatible Mods:**
 - None that I know of right now
