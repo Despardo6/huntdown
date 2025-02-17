@@ -35,9 +35,9 @@ Your mission will be displayed to all members of your team in the chat once you 
 - Haunted Harpist [(Haunted Harpist)](https://thunderstore.io/c/lethal-company/p/Bob123/Haunted_Harpist/)
 - Phantom Piper [(Haunted Harpist)](https://thunderstore.io/c/lethal-company/p/Bob123/Haunted_Harpist/)
 - Ethereal Enforcer [(Haunted Harpist)](https://thunderstore.io/c/lethal-company/p/Bob123/Haunted_Harpist/)
-- <details><summary>Last Year's Interns [(LethalThings)](https://thunderstore.io/c/lethal-company/p/Evaisa/LethalThings/) (Spoiler)</summary>Four Dead men coming to kill you</details>
-- <details><summary>Zombie Apocalypse [(LethalThings)](https://thunderstore.io/c/lethal-company/p/Evaisa/LethalThings/) (Spoiler)</summary>A large army of 15 zombies</details>
-- <details><summary>The Firing Squad [(Haunted Harpist)](https://thunderstore.io/c/lethal-company/p/Bob123/Haunted_Harpist/) (Spoiler)</summary>A squad featuring 4 Ethereal Enforcers and a Nutcracker</details>
+- <details><summary>Last Year's Interns (LethalThings) (Spoiler)</summary>Four Dead men coming to kill you</details>
+- <details><summary>Zombie Apocalypse (LethalThings) (Spoiler)</summary>A large army of 15 zombies</details>
+- <details><summary>The Firing Squad (Haunted Harpist) (Spoiler)</summary>A squad featuring 4 Ethereal Enforcers and a Nutcracker</details>
 
 **Supported Mods that can add extra mission targets or mission rewards:**
 <details><summary>LethalThings</summary>3 extra missions and bunch of new items for reward pools</details
